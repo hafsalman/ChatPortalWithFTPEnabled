@@ -12,7 +12,9 @@ def createConnection():
         if (conn.is_connected): 
             print("Database is connected successfully!")
             #Remove it after
-            conn.close()
+            #conn.close()
+
+            return conn
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
