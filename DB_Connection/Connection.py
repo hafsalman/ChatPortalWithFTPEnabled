@@ -9,7 +9,7 @@ def createConnection():
             database = "CN_PROJECT"
         )
 
-        if (conn.is_connected): 
+        if conn.is_connected(): 
             print("Database is connected successfully!")
             #Remove it after
             #conn.close()
