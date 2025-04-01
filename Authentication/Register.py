@@ -12,21 +12,42 @@ def RegisterUser(full_name, username, email, password, phone_number = None, prof
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT * FROM USERS WHERE email = %s", email)
+        cursor.execute("SELECT * FROM USERS WHERE email = %s", (email, ))
         existingEmail = cursor.fetchone()
 
         if existingEmail:
             print("Error: This Email already exists!")
             return False
         
-        cursor.execute("SELECT * FROM USERS WHERE username = %s", username)
+        cursor.execute("SELECT * FROM USERS WHERE username = %s", (username, ))
         existingUser = cursor.fetchone()
 
         if existingUser:
             print("Error: This Username already exists!")
             return False
         
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
         #Inserting User
-        cursor.execute
+        cursor.execute("""INSERT INTO USERS (full_name, username, email, password_hash, phone_number, profile_picture) VALUES (%s, %s, %s, %s, %s, %s)""", (full_name, username, email, hashed_password, phone_number, profile_picture))
+
+        conn.commit()
+        print("User registered successfully")
+        return True
+    
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return False
+    
+    finally:
+        cursor.close()
+        conn.close()
+
+#Testing --Change once it works
+if __name__ == "__main__":
+    full_name = "Hafsa Salman"
+    username = "__hafsay"
+    email = "k225161@nu.edu.pk"
+    password = "22K-5161"
+
+    RegisterUser(full_name, username, email, password)
