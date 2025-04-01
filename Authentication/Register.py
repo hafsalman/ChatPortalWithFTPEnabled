@@ -1,9 +1,13 @@
 import mysql.connector
 from DB_Connection.Connection import createConnection
 import bcrypt
+import subprocess
+import os
+import sys
 
 #Change Phone Number and Profile Picture later
 # def RegisterUser(full_name, username, email, password, phone_number = None, profile_picture = None):
+
 def RegisterUser():
     conn = createConnection()
     if conn is None:
@@ -41,7 +45,12 @@ def RegisterUser():
         cursor.execute("""INSERT INTO USERS (full_name, username, email, password_hash, phone_number, profile_picture) VALUES (%s, %s, %s, %s, %s, %s)""", (full_name, username, email, hashed_password, phone_number, profile_picture))
 
         conn.commit()
+
         print("User registered successfully")
+
+        print("Redirecting to the Login page...")
+
+        subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Login.py")])
         return True
     
     except mysql.connector.Error as err:
