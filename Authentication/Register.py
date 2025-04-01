@@ -63,11 +63,4 @@ def RegisterUser():
 
 #Testing --Change once it works
 if __name__ == "__main__":
-    # full_name = "Hafsa Salman"
-    # username = "__hafsay"
-    # email = "k225161@nu.edu.pk"
-    # password = "22K-5161"
-
-    # RegisterUser(full_name, username, email, password)
-
     RegisterUser()
