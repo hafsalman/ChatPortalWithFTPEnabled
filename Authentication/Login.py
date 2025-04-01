@@ -18,7 +18,7 @@ def LoginUser():
         password = input("Enter Password: ").strip()
 
         cursor.execute("SELECT user_id, username, password_hash FROM USERS WHERE username = %s", (username, ))
-        username = cursor.fetchone()
+        user = cursor.fetchone()
 
         if not user:
             print("Invalid username!")
