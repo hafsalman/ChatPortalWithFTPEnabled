@@ -27,4 +27,6 @@ def RegisterUser(full_name, username, email, password, phone_number = None, prof
             return False
         
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        
+
+        #Inserting User
+        cursor.execute
