@@ -3,7 +3,7 @@ from DB_Connection.Connection import createConnection
 import bcrypt
 
 #Change Phone Number and Profile Picture later
-def RegisterUser(full_name, username, email, password, phone_number = None, profile_picture = None)
+def RegisterUser(full_name, username, email, password, phone_number = None, profile_picture = None):
     conn = createConnection()
     if conn is None:
         print("Database Connection Failed!")
@@ -25,3 +25,6 @@ def RegisterUser(full_name, username, email, password, phone_number = None, prof
         if existingUser:
             print("Error: This Username already exists!")
             return False
+        
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        
