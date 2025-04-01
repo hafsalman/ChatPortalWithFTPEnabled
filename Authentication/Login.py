@@ -8,4 +8,22 @@ def LoginUser():
     conn = createConnection()
 
     if conn is None:
-        print
+        print("Database Connection Failed!")
+        return False
+    
+    cursor = conn.cursor()
+
+    try:
+        username = input("Enter Username: ").strip()
+        password = input("Enter Password: ").strip()
+
+        cursor.execute("SELECT user_id, username, password_hash FROM USERS WHERE username = %s", (username, ))
+        username = cursor.fetchone()
+
+        if not user:
+            print("Invalid username!")
+            return False
+        
+        username, password = user
+
+        if not 
