@@ -12,4 +12,16 @@ def RegisterUser(full_name, username, email, password, phone_number = None, prof
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT * FROM USERS WHERE username = %s OR email = %s", username, email)
+        cursor.execute("SELECT * FROM USERS WHERE email = %s", email)
+        existingEmail = cursor.fetchone()
+
+        if existingEmail:
+            print("Error: This Email already exists!")
+            return False
+        
+        cursor.execute("SELECT * FROM USERS WHERE username = %s", username)
+        existingUser = cursor.fetchone()
+
+        if existingUser:
+            print("Error: This Username already exists!")
+            return False
