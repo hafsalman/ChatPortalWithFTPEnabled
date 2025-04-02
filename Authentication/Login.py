@@ -24,6 +24,22 @@ def LoginUser():
             print("Invalid username!")
             return False
         
-        username, password = user
+        username, stored_password = user
 
-        if not 
+        if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+            print("Incorrect Password!")
+            return False      
+        
+        print("Successful Login! Welcome {username}")
+
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
+        return False
+    
+    finally:
+        cursor.close()
+        conn.close()
+
+if __name__ == "__main__":
+    if LoginUser():
+        print("WHEEEEEEEEEEEEEEEEE")
