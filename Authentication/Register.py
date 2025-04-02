@@ -1,9 +1,10 @@
 import mysql.connector
-from DB_Connection.Connection import createConnection
 import bcrypt
 import subprocess
 import os
 import sys
+
+from DB_Connection.Connection import createConnection
 
 #Change Phone Number and Profile Picture later
 # def RegisterUser(full_name, username, email, password, phone_number = None, profile_picture = None):
