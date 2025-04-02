@@ -17,20 +17,20 @@ def LoginUser():
         username = input("Enter Username: ").strip()
         password = input("Enter Password: ").strip()
 
-        cursor.execute("SELECT user_id, username, password_hash FROM USERS WHERE username = %s", (username, ))
+        cursor.execute("SELECT user_id, username, email, password_hash FROM USERS WHERE username = %s", (username, ))
         user = cursor.fetchone()
 
         if not user:
             print("Invalid username!")
             return False
         
-        username, stored_password = user
+        user_id, username, email, stored_password = user
 
         if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             print("Incorrect Password!")
             return False      
         
-        print("Successful Login! Welcome {username}")
+        print(f"Successful Login! Welcome {username}")
 
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
