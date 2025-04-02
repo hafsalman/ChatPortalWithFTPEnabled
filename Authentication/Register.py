@@ -4,6 +4,8 @@ import subprocess
 import os
 import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from DB_Connection.Connection import createConnection
 
 #Change Phone Number and Profile Picture later
