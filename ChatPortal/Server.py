@@ -35,4 +35,22 @@ def MessageHistory():
         cursor.close()
         conn.close()
 
-async
+async def HandleClient(websocket, path):
+    login_data = websocket.recv()
+    user_info = json.loads(login_data)
+    username = user_info["username"]
+
+    session[username] = websocket
+    print(f"{username} MEOWED")
+
+    conn = createConnection()
+
+    if conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT DISTINCT sender, receiver WHERE sender = %s OR receiver = %s", (username, username))
+
+        contacts = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
