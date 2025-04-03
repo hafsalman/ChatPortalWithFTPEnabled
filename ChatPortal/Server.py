@@ -54,3 +54,6 @@ async def HandleClient(websocket, path):
 
         cursor.close()
         conn.close()
+
+        for contact in contacts:
+            chatPartner = contact[0] if contact[0] != username else contact[1]
