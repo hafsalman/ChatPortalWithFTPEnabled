@@ -17,4 +17,22 @@ def MessageHistory():
     if conn is None:
         return[]
     
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary = True)
+    
+    try:
+        cursor.execute("""SELECT sender, reciever, message, m_time FROM MESSAGES WHERE (sender = %s AND receiver = %s) OR (receiver = %s AND sender = %s) ORDER BY m_time ASC""", (user1, user2, user2, user1))
+
+        messages = cursor.fetchall()
+
+        return messages
+    
+    except Exception as err:
+        print(f"Database Error: {err}")
+
+        return[]
+    
+    finally:
+        cursor.close()
+        conn.close()
+
+async
