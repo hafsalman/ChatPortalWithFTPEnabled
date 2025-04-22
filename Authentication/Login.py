@@ -47,7 +47,7 @@ def LoginUser():
 
 def launch_client(username):
     try:
-        subprocess.Popen(["python", "client.py", username])
+        subprocess.Popen(["python", "ChatPortal\Client.py", username])
     
     except Exception as e:
         print(f"Failed to launch client chat: {e}")
