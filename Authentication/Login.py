@@ -1,3 +1,4 @@
+import subprocess
 import mysql.connector
 import bcrypt
 import sys
@@ -34,6 +35,7 @@ def LoginUser():
             return False      
         
         print(f"Successful Login! Welcome {username}")
+        launch_client(username)
 
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
@@ -42,6 +44,13 @@ def LoginUser():
     finally:
         cursor.close()
         conn.close()
+
+def launch_client(username):
+    try:
+        subprocess.Popen(["python", "client.py", username])
+    
+    except Exception as e:
+        print(f"Failed to launch client chat: {e}")
 
 if __name__ == "__main__":
     if LoginUser():
