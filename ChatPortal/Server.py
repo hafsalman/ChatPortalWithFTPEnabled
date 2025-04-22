@@ -61,64 +61,124 @@
 import socket
 import threading
 import mysql.connector
+import datetime
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from DB_Connection.Connection import createConnection
 
-clients = {}
+HOST = '0.0.0.0'
+PORT = 5555
 
-def handle_client(conn, addr):
-    conn.send("Username: ".encode())
-    username = conn.recv(1024).decode()
-    clients[username] = conn
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
 
-    print(f"[{username}] connected from {addr}")
+clients = {}  # username -> socket
 
-    try:
-        while True:
-            msg = conn.recv(1024).decode()
-            if msg.lower() == "exit":
+print(f"📡 Server listening on {HOST}:{PORT}")
+
+def handle_client(client_socket, addr, username):
+    print(f"✅ {username} connected from {addr}")
+    clients[username] = client_socket
+
+    # Send chat history
+    send_chat_history(client_socket, username)
+
+    while True:
+        try:
+            msg = client_socket.recv(4096).decode('utf-8')
+            if not msg:
                 break
 
-            if ":" in msg:
-                receiver, message = msg.split(":", 1)
-                receiver = receiver.strip()
-                message = message.strip()
+            # Check for private message (e.g., @john Hello)
+            if msg.startswith('@'):
+                parts = msg.split(' ', 1)
+                if len(parts) < 2:
+                    continue
+                target_username = parts[0][1:]
+                actual_msg = parts[1]
 
-                save_message(username, receiver, message)
-
-                if receiver in clients:
-                    clients[receiver].send(f"[{username}] {message}".encode())
-                else:
-                    conn.send(f"{receiver} is not online.".encode())
+                store_message(username, target_username, actual_msg)
+                send_private_message(username, target_username, actual_msg)
             else:
-                conn.send("Invalid format. Use: receiver: message".encode())
-    except:
-        pass
-    finally:
-        print(f"[{username}] disconnected.")
-        conn.close()
-        clients.pop(username, None)
+                # Broadcast to everyone else
+                for user, sock in clients.items():
+                    if sock != client_socket:
+                        try:
+                            sock.send(f"[{username}]: {msg}".encode('utf-8'))
+                        except:
+                            pass
+        except:
+            break
 
-def save_message(sender, receiver, message):
+    # Disconnecting
+    print(f"❌ {username} disconnected.")
+    del clients[username]
+    client_socket.close()
+
+def send_chat_history(client_socket, username):
     conn = createConnection()
-    if conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO MESSAGES (sender, receiver, message)
-            VALUES (%s, %s, %s)
-        """, (sender, receiver, message))
-        conn.commit()
+    if not conn:
+        return
+    cursor = conn.cursor()
+
+    try:
+        query = """
+            SELECT sender, receiver, message, m_time FROM MESSAGES 
+            WHERE sender = %s OR receiver = %s
+            ORDER BY m_time ASC
+        """
+        cursor.execute(query, (username, username))
+        messages = cursor.fetchall()
+
+        if messages:
+            client_socket.send("🕘 Chat History:\n".encode('utf-8'))
+            for sender, receiver, msg, m_time in messages:
+                if receiver == username:
+                    formatted = f"[{m_time}] {sender} ➜ You: {msg}"
+                else:
+                    formatted = f"[{m_time}] You ➜ {receiver}: {msg}"
+                client_socket.send(formatted.encode('utf-8'))
+    except Exception as e:
+        print(f"⚠️ History error: {e}")
+    finally:
         cursor.close()
         conn.close()
 
-def start_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("localhost", 12345))
-    server.listen()
-    print("[Server] Listening on port 12345...")
+def store_message(sender, receiver, msg):
+    conn = createConnection()
+    if not conn:
+        return
+    cursor = conn.cursor()
 
+    try:
+        cursor.execute("""
+            INSERT INTO MESSAGES (sender, receiver, message)
+            VALUES (%s, %s, %s)
+        """, (sender, receiver, msg))
+        conn.commit()
+    except Exception as e:
+        print(f"⚠️ Store error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+def send_private_message(sender, receiver, msg):
+    if receiver in clients:
+        try:
+            clients[receiver].send(f"[Private] {sender} ➜ You: {msg}".encode('utf-8'))
+            clients[sender].send(f"[Private] You ➜ {receiver}: {msg}".encode('utf-8'))
+        except:
+            pass
+    else:
+        clients[sender].send(f"⚠️ User {receiver} is not online.".encode('utf-8'))
+
+def accept_connections():
     while True:
-        conn, addr = server.accept()
-        threading.Thread(target=handle_client, args=(conn, addr)).start()
+        client_socket, addr = server.accept()
+        username = client_socket.recv(1024).decode('utf-8')
+        threading.Thread(target=handle_client, args=(client_socket, addr, username), daemon=True).start()
 
-if __name__ == "__main__":
-    start_server()
+accept_connections()
