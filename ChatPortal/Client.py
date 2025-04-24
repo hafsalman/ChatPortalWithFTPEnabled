@@ -1,37 +1,29 @@
 import socket
 import threading 
 import sys
+import os
+import mysql.connector
+from datetime import datetime
 
-# import socket
-# import threading
-# import sys
-# import os
-# import mysql.connector
-# from datetime import datetime
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# # === DB Connection ===
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# from DB_Connection.Connection import createConnection
+from DB_Connection.Connection import createConnection
 
-# # === Configuration ===
-# HOST = '127.0.0.1'
-# PORT = 5555
+HOST = '127.0.0.1'
+PORT = 5555
 
-# # === Load Message History ===
-# def load_history(username):
-#     conn = createConnection()
-#     if conn is None:
-#         print("❌ Could not connect to DB for history.")
-#         return
+def ShowHistory(usernamr):
+    conn = createConnection()
 
-#     try:
-#         cursor = conn.cursor()
-#         cursor.execute("""
-#             SELECT sender, receiver, message, m_time
-#             FROM MESSAGES
-#             WHERE (sender = %s AND receiver = 'server') OR (sender = 'server' AND receiver = %s)
-#             ORDER BY m_time ASC
-#         """, (username, username))
+    if conn is None:
+        print("Couldn't connect to the Database!")
+        return
+    
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT sender, reciever, messafe, m_time FROM MESSAGES WHERE (sender = %s AND receiver = 'server') OR (sender = 'server' AND receiver = %s) ORDER BY  m_time ASC""", (username, username))
+
 
 #         print("\n📜 Message History with Server:")
 #         print("-----------------------------------")
