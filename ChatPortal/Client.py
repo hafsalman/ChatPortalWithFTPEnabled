@@ -70,26 +70,17 @@ def StartChat(username):
             message = input("Client: ").strip()
 
             if message:
-                formatted = f
+                formatted = f"{username}|server|{message}"
+                client.send(formatted.encode('utf-8'))
+        
+        except KeyboardInterrupt:
+            print("\nExiting Chat!")
+            client.close()
 
-#     # Start receiving messages
-#     threading.Thread(target=receive_messages, args=(client,), daemon=True).start()
+            break
 
-#     # Start sending messages
-#     while True:
-#         try:
-#             message = input("Client: ").strip()
-#             if message:
-#                 formatted = f"{username}|server|{message}"
-#                 client.send(formatted.encode('utf-8'))
-#         except KeyboardInterrupt:
-#             print("\n❌ Exiting chat.")
-#             client.close()
-#             break
-
-# # === Entry Point ===
-# if __name__ == "__main__":
-#     if len(sys.argv) < 2:
-#         print("Usage: python Client.py <username>")
-#     else:
-#         start_chat(sys.argv[1])
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python Client.py <username>")
+    else:
+        StartChat(sys.argv[1])
