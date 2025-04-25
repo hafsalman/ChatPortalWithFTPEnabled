@@ -12,7 +12,7 @@ from DB_Connection.Connection import createConnection
 HOST = '127.0.0.1'
 PORT = 5555
 
-def ShowHistory(usernamr):
+def ShowHistory(username):
     conn = createConnection()
 
     if conn is None:
@@ -49,25 +49,28 @@ def ReceiveMessage(sock):
             print("Connection Lost!")
             break
 
+def StartChat(username):
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    try:
+        client.connect((HOST, PORT))
 
-# # === Main Chat Function ===
-# def start_chat(username):
-#     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     try:
-#         client.connect((HOST, PORT))
-#     except Exception as e:
-#         print(f"❌ Connection failed: {e}")
-#         return
+    except Exception as e:
+        print(f"Connection failed: {e}")
+        return
+    
+    client.send(username.encode('utf-8'))
 
-#     # Send your username to the server
-#     client.send(username.encode('utf-8'))
+    ShowHistory(username)
 
-#     # Load old messages
-#     load_history(username)
+    threading.Thread(target=ReceiveMessage, args=(client,), daemon=True).start()
 
-#     print("💬 You are now chatting with the server.")
-#     print("Type your message and press Enter.\n")
+    while True:
+        try:
+            message = input("Client: ").strip()
+
+            if message:
+                formatted = f
 
 #     # Start receiving messages
 #     threading.Thread(target=receive_messages, args=(client,), daemon=True).start()
