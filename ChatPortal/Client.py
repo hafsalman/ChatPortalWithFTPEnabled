@@ -70,7 +70,7 @@ def StartChat(username):
             message = input("Client: ").strip()
 
             if message:
-                formatted = f"{username}|server|{message}"
+                formatted = f"{username}: {message}"
                 client.send(formatted.encode('utf-8'))
         
         except KeyboardInterrupt:
