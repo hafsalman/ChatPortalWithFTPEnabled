@@ -11,9 +11,6 @@ def createConnection():
 
         if conn.is_connected(): 
             print("Database is connected successfully!")
-            
-            #Remove it after
-            #conn.close()
 
             return conn
 
