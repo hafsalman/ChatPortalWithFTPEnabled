@@ -1,53 +1,51 @@
-import os
-import subprocess
+# import os
+# import subprocess
+# from DB_Connection.Connection import createConnection
+
+# def main():
+#     while True:
+#         print("Welcome to Chat Portal")
+#         print("1. Register")
+#         print("2. Login")
+        
+#         choice = input("Choice: ").strip()
+
+#         if choice == "1":
+#             print("Registration Page!")
+#             subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Register.py")])
+
+#         elif choice == "2":
+#             print("Login Page!")
+#             subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Login.py")])
+
+#         else:
+#             print("Invalid choice!")
+
+# if __name__ == "__main__":
+#     main()
+
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-import uvicorn
+from Authentication.Register import RegisterUser
+from Authentication.Login import login_user
 
 app = FastAPI()
 
-@app.get("/", response_class=HTMLResponse)
-async def home():
-    return """
-    <html>
-        <head>
-            <title>Chat Portal</title>
-        </head>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Welcome to Chat Portal</h2>
-            <form action="/register" method="post">
-                <input type="submit" value="Register" style="padding:10px; margin:5px;">
-            </form>
-            <form action="/login" method="post">
-                <input type="submit" value="Login" style="padding:10px; margin:5px;">
-            </form>
-        </body>
-    </html>
-    """
+@app.get("/")
+def home():
+    return {"message": "Welcome to Chat Portal. Visit /register or /login"}
 
-@app.post("/register", response_class=HTMLResponse)
-async def register():
-    subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Register.py")])
-    return """
-    <html>
-        <body>
-            <h3>✅ Registration Completed Successfully!</h3>
-            <a href="/">Go Back</a>
-        </body>
-    </html>
-    """
+@app.post("/register")
+def register_user():
+    try:
+        RegisterUser()
+        return {"status": "success", "message": "Registration completed"}
+    except Exception as e:
+        return {"status": "error", "message": f"Registration failed: {str(e)}"}
 
-@app.post("/login", response_class=HTMLResponse)
-async def login():
-    subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Login.py")])
-    return """
-    <html>
-        <body>
-            <h3>✅ Login Attempted. Please Check Console.</h3>
-            <a href="/">Go Back</a>
-        </body>
-    </html>
-    """
-
-if __name__ == "__main__":
-    uvicorn.run("Main:app", host="127.0.0.1", port=8000, reload=True)
+@app.post("/login")
+def LoginUser():
+    try:
+        login_user()
+        return {"status": "success", "message": "Login completed"}
+    except Exception as e:
+        return {"status": "error", "message": f"Login failed: {str(e)}"}
