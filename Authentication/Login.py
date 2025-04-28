@@ -65,13 +65,11 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
-# Allow imports from parent directories
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from DB_Connection.Connection import createConnection
 
 app = FastAPI()
 
-# Pydantic model for input validation
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -100,8 +98,6 @@ def login_user(request: LoginRequest):
         if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             raise HTTPException(status_code=401, detail="Incorrect password!")
 
-        # Successful login
-        # Launch client in a subprocess (optional - usually not triggered from API servers, but okay for your case)
         try:
             launch_client(username)
         except Exception as e:
@@ -124,4 +120,4 @@ def launch_client(username):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("Authentication.Login:app", host="127.0.0.1", port=8001, reload=True)
+    uvicorn.run("Authentication.Login:app", host="127.0.0.1", port=8000, reload=True)

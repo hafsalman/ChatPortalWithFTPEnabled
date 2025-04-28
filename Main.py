@@ -30,6 +30,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from DB_Connection.Connection import createConnection
+from Authentication.Login import login_user
+from Authentication.Register import RegisterUser
 
 app = FastAPI()
 
@@ -38,7 +40,7 @@ current_dir = os.path.dirname(__file__)
 register_script = os.path.join(current_dir, "Authentication", "Register.py")
 login_script = os.path.join(current_dir, "Authentication", "Login.py")
 
-@app.get("/")
+@app.post("/")
 def welcome():
     return {
         "message": "Welcome to Chat Portal!",
@@ -52,16 +54,14 @@ def welcome():
 @app.post("/register")
 def register():
     try:
-        result = subprocess.run(["python", register_script], capture_output=True, text=True)
-        return JSONResponse(content={"output": result.stdout}, status_code=200)
+        RegisterUser()
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.post("/login")
+@app.get("/login")
 def login():
     try:
-        result = subprocess.run(["python", login_script], capture_output=True, text=True)
-        return JSONResponse(content={"output": result.stdout}, status_code=200)
+        login_user()
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
