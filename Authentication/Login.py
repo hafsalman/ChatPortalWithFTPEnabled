@@ -61,63 +61,70 @@ import mysql.connector
 import bcrypt
 import sys
 import os
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Form
+from fastapi.responses import HTMLResponse
+import uvicorn
 
+# Set path for DB connection
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from DB_Connection.Connection import createConnection
 
 app = FastAPI()
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-@app.post("/login")
-def login_user(request: LoginRequest):
+def login_user(username: str, password: str):
     conn = createConnection()
 
     if conn is None:
-        raise HTTPException(status_code=500, detail="Database Connection Failed!")
-
+        return "❌ Database Connection Failed!"
+    
     cursor = conn.cursor()
 
     try:
-        username = request.username.strip()
-        password = request.password.strip()
-
+        # Fetch user data
         cursor.execute("SELECT user_id, username, email, password_hash FROM USERS WHERE username = %s", (username,))
         user = cursor.fetchone()
 
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid username!")
-
+            return "❌ Invalid username!"
+        
         user_id, db_username, email, stored_password = user
 
         if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-            raise HTTPException(status_code=401, detail="Incorrect password!")
-
-        try:
-            launch_client(username)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to launch chat client: {e}")
-
-        return JSONResponse(content={"message": f"Successful Login! Welcome {username}"}, status_code=200)
+            return "❌ Incorrect password!"
+        
+        # Successful login
+        launch_client(db_username)
+        return f"✅ Successful Login! Welcome {db_username}"
 
     except mysql.connector.Error as err:
-        raise HTTPException(status_code=500, detail=f"Database error: {err}")
-
+        return f"❌ Database error: {err}"
+    
     finally:
         cursor.close()
         conn.close()
 
 def launch_client(username):
     try:
-        subprocess.run(["python", "ChatPortal/Client.py", username])
+        subprocess.Popen(["python", os.path.join(os.path.dirname(__file__), '..', "ChatPortal", "Client.py"), username])
     except Exception as e:
-        raise Exception(f"Failed to launch client: {e}")
+        print(f"❌ Failed to launch chat client: {e}")
+
+@app.get("/", response_class=HTMLResponse)
+async def login_page():
+    return """
+    <h2>Login to Chat Portal</h2>
+    <form action="/login" method="post">
+        <input type="text" name="username" placeholder="Username" required><br><br>
+        <input type="password" name="password" placeholder="Password" required><br><br>
+        <input type="submit" value="Login">
+    </form>
+    """
+
+@app.post("/login", response_class=HTMLResponse)
+async def login(username: str = Form(...), password: str = Form(...)):
+    result = login_user(username, password)
+    return f"<h3>{result}</h3><br><a href='/'>Go back</a>"
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("Authentication.Login:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("Authentication.Login:app", host="127.0.0.1", port=8001, reload=True)

@@ -1,42 +1,53 @@
 import os
 import subprocess
-import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from DB_Connection.Connection import createConnection
-from Authentication.Login import login_user
-from Authentication.Register import RegisterUser
+from fastapi.responses import HTMLResponse
+import uvicorn
 
 app = FastAPI()
 
-current_dir = os.path.dirname(__file__)
-register_script = os.path.join(current_dir, "Authentication", "Register.py")
-login_script = os.path.join(current_dir, "Authentication", "Login.py")
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    return """
+    <html>
+        <head>
+            <title>Chat Portal</title>
+        </head>
+        <body style="font-family: Arial, sans-serif;">
+            <h2>Welcome to Chat Portal</h2>
+            <form action="/register" method="post">
+                <input type="submit" value="Register" style="padding:10px; margin:5px;">
+            </form>
+            <form action="/login" method="post">
+                <input type="submit" value="Login" style="padding:10px; margin:5px;">
+            </form>
+        </body>
+    </html>
+    """
 
-@app.get("/")
-def welcome():
-    return {
-        "message": "Welcome to Chat Portal!",
-        "options": 
-        {
-            "1": "Register - visit /register",
-            "2": "Login - visit /login"
-        }
-    }
+@app.post("/register", response_class=HTMLResponse)
+async def register():
+    subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Register.py")])
+    return """
+    <html>
+        <body>
+            <h3>✅ Registration Completed Successfully!</h3>
+            <a href="/">Go Back</a>
+        </body>
+    </html>
+    """
 
-@app.post("/register")
-def register():
-    try:
-        RegisterUser()
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-
-@app.post("/login")
-def login():
-    try:
-        login_user()
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+@app.post("/login", response_class=HTMLResponse)
+async def login():
+    subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Login.py")])
+    return """
+    <html>
+        <body>
+            <h3>✅ Login Attempted. Please Check Console.</h3>
+            <a href="/">Go Back</a>
+        </body>
+    </html>
+    """
 
 if __name__ == "__main__":
     uvicorn.run("Main:app", host="127.0.0.1", port=8000, reload=True)
