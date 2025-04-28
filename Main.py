@@ -1,34 +1,13 @@
-# import os
-# import subprocess
-# from DB_Connection.Connection import createConnection
-
-# def main():
-#     while True:
-#         print("Welcome to Chat Portal")
-#         print("1. Register")
-#         print("2. Login")
-        
-#         choice = input("Choice: ").strip()
-
-#         if choice == "1":
-#             print("Registration Page!")
-#             subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Register.py")])
-
-#         elif choice == "2":
-#             print("Login Page!")
-#             subprocess.run(["python", os.path.join(os.path.dirname(__file__), "Authentication", "Login.py")])
-
-#         else:
-#             print("Invalid choice!")
-
-# if __name__ == "__main__":
-#     main()
-
 from fastapi import FastAPI
-from Authentication.Register import RegisterUser
+from pydantic import BaseModel
 from Authentication.Login import login_user
+from Authentication.Register import RegisterUser  # assuming you have similar register function
 
 app = FastAPI()
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 @app.get("/")
 def home():
@@ -43,9 +22,6 @@ def register_user():
         return {"status": "error", "message": f"Registration failed: {str(e)}"}
 
 @app.post("/login")
-def LoginUser():
-    try:
-        login_user()
-        return {"status": "success", "message": "Login completed"}
-    except Exception as e:
-        return {"status": "error", "message": f"Login failed: {str(e)}"}
+def login_api(request: LoginRequest):
+    result = login_user(request.username, request.password)
+    return result
