@@ -40,8 +40,7 @@ login_script = os.path.join(current_dir, "Authentication", "Login.py")
 
 @app.get("/")
 def welcome():
-    return 
-    {
+    return {
         "message": "Welcome to Chat Portal!",
         "options": 
         {
