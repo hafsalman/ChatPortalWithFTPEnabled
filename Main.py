@@ -37,3 +37,7 @@ def register_api(request: RegisterRequest):
 def login_api(request: LoginRequest):
     result = login_user(request.username, request.password)
     return result
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("Main:app", host="127.0.0.1", port=8001, reload=True)
