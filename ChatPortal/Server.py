@@ -36,3 +36,23 @@ def read_root():
 def send_message(msg: Message):
     save_message(msg.sender, msg.receiver, msg.message)
     return {"status": "Message stored successfully"}
+
+@app.get("/messages")
+def get_messages(user: str, since: float):
+    """Get messages sent to this user since a timestamp"""
+    conn = createConnection()
+    if not conn:
+        raise HTTPException(500, "Database connection failed")
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT sender, message FROM MESSAGES "
+            "WHERE receiver = %s AND timestamp > FROM_UNIXTIME(%s) "
+            "ORDER BY timestamp",
+            (user, since)
+        )
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
