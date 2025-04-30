@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from Authentication.Login import login_user
-from Authentication.Register import register_user  # assuming you have similar register function
+from Authentication.Register import register_user
 
 app = FastAPI()
 
