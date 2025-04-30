@@ -85,52 +85,45 @@
 #     else:
 #         StartChat(sys.argv[1])
 
-import requests
+import socket
 import sys
 
-BASE_URL = "http://127.0.0.1:8000"
+def start_client():
+    # Server details
+    host = '127.0.0.1'
+    port = 8000
 
-def show_history(username):
     try:
-        response = requests.get(f"{BASE_URL}/history/{username}")
-        if response.status_code == 200:
-            messages = response.json()
-            for msg in messages:
-                print(f"[{msg['m_time']}] {msg['sender']}: {msg['message']}")
-        else:
-            print("Could not retrieve history.")
+        # Create a socket object
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Connect to the server
+        client_socket.connect((host, port))
+        print(f"Connected to server at {host}:{port}")
+
+        # Send a welcome message or any data if needed
+        client_socket.sendall(b'Hello, Server! Client is connected.')
+
+        # Receive server response
+        response = client_socket.recv(1024)
+        print(f"Server response: {response.decode()}")
+
+        # Keep the connection open and handle communication
+        while True:
+            message = input("Enter message to send to server (or 'exit' to quit): ")
+            if message.lower() == 'exit':
+                break
+            client_socket.sendall(message.encode())
+            response = client_socket.recv(1024)
+            print(f"Server response: {response.decode()}")
+
+    except ConnectionRefusedError:
+        print("Could not connect to the server. Make sure the server is running.")
     except Exception as e:
-        print(f"Error fetching history: {e}")
-
-def start_chat(username):
-    print(f"Welcome, {username}! Starting chat with server.")
-    show_history(username)
-
-    while True:
-        try:
-            message = input("You: ").strip()
-            if not message:
-                continue
-
-            payload = {
-                "sender": username,
-                "receiver": "server",
-                "message": message
-            }
-
-            response = requests.post(f"{BASE_URL}/send", json=payload)
-
-            if response.status_code == 200:
-                print(f"Server: {response.json()['reply']}")
-            else:
-                print("Failed to send message.")
-
-        except KeyboardInterrupt:
-            print("\nExiting chat.")
-            break
+        print(f"Error: {e}")
+    finally:
+        client_socket.close()
+        print("Connection closed.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python Client.py <username>")
-    else:
-        start_chat(sys.argv[1])
+    start_client()
