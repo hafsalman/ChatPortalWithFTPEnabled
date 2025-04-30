@@ -1,7 +1,8 @@
 # Chat Portal With FTP Enabled
 
 Commands to run:
-1. python -m FolderName.FileName
+1. uvicorn Main:app --reload
+2. uvicorn ChatPortal.Server:app --reload
 
 Commands to push:
 1. git add .
