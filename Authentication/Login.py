@@ -1,5 +1,5 @@
 from DB_Connection.Connection import createConnection
-from ChatPortal.Client import start_client
+from ChatPortal.Client import StartChat
 import mysql.connector
 import bcrypt
 
