@@ -1,3 +1,5 @@
+#DB Connection
+
 import mysql.connector
 
 def createConnection():
