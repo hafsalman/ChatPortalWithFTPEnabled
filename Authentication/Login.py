@@ -1,6 +1,8 @@
 from DB_Connection.Connection import createConnection
 import mysql.connector
 import bcrypt
+#import threading
+#from ChatPortal.Client import StartChat
 
 def login_user(username: str, password: str):
     conn = createConnection()
@@ -22,7 +24,8 @@ def login_user(username: str, password: str):
         if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             return {"status": "error", "message": "Incorrect password"}
 
-        # You can later return user_id/email/token if needed
+        #threading.Thread(target=StartChat, args=(username,), daemon=True).start()
+
         return {"status": "success", "message": f"Welcome {username_db}"}
     
     except mysql.connector.Error as err:
