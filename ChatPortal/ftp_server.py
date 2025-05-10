@@ -8,7 +8,7 @@ def start_ftp():
     handler = FTPHandler
     handler.authorizer = authorizer
 
-    server = FTPServer(("0.0.0.0", 2121), handler)  # Listen on all IPs (0.0.0.0) and port 2121
+    server = FTPServer(("0.0.0.0", 2121), handler)
     server.serve_forever()
 
 if __name__ == "__main__":
