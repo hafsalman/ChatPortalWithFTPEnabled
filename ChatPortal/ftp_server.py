@@ -11,5 +11,5 @@ def start_ftp():
     server = FTPServer(("0.0.0.0", 2121), handler)  # Listen on all IPs (0.0.0.0) and port 2121
     server.serve_forever()
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     start_ftp()
