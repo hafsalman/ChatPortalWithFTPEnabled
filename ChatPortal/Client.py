@@ -2,11 +2,9 @@ import socket
 import threading 
 import sys
 import os
-import mysql.connector
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from DB_Connection.Connection import createConnection
 
 HOST = '127.0.0.1'
@@ -22,7 +20,10 @@ def ShowHistory(username):
     try:
         cursor = conn.cursor()
 
-        cursor.execute("""SELECT sender, reciever, messafe, m_time FROM MESSAGES WHERE (sender = %s AND receiver = 'server') OR (sender = 'server' AND receiver = %s) ORDER BY  m_time ASC""", (username, username))
+        cursor.execute("""SELECT sender, receiver, message, m_time FROM MESSAGES 
+                  WHERE (sender = %s AND receiver = 'server') 
+                  OR (sender = 'server' AND receiver = %s) 
+                  ORDER BY m_time ASC""", (username, username))
         for row in cursor.fetchall():
             sender, receiver, message, timestamp = row
             print(f"[{timestamp.strftime('%Y-%m-%d %H:%M:%S')}] {sender}: {message}")
@@ -79,7 +80,7 @@ def StartChat(username):
 
             break
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     if len(sys.argv) < 2:
         print("Usage: python Client.py <username>")
     else:

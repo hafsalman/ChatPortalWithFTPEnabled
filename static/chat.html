@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Chat</title>
+  <style>
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #252525;
+      --bg-tertiary: #2d2d2d;
+      --text-primary: #e0e0e0;
+      --text-secondary: #a0a0a0;
+      --accent: #7289da;
+      --accent-hover: #5f73bc;
+      --success: #43b581;
+      --success-hover: #3ca374;
+      --danger: #f04747;
+      --border: #3a3a3a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    h2 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    #chat-container {
+      width: 100%;
+      max-width: 700px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat-box {
+      border: 1px solid var(--border);
+      height: 400px;
+      overflow-y: auto;
+      padding: 16px;
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      margin-bottom: 20px;
+      font-size: 15px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) var(--bg-tertiary);
+    }
+
+    #chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat-box::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+
+    #chat-box::-webkit-scrollbar-thumb {
+      background-color: var(--border);
+      border-radius: 8px;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      word-break: break-word;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .system-message {
+      font-style: italic;
+      color: var(--text-secondary);
+      background: transparent;
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+    }
+
+    #input-area {
+      display: flex;
+      margin-top: 10px;
+      gap: 10px;
+    }
+
+    #msg {
+      flex-grow: 1;
+      padding: 14px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    #msg:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.3);
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #file-form {
+      display: flex;
+      margin-top: 16px;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    #file {
+      flex-grow: 1;
+      color: var(--text-secondary);
+    }
+
+    #file-form button {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    #file-form button:hover {
+      background: var(--border);
+    }
+
+    /* Custom file input styling */
+    input[type="file"] {
+      position: relative;
+      color: transparent;
+    }
+
+    input[type="file"]::before {
+      content: 'Choose File';
+      display: inline-block;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    input[type="file"]::after {
+      content: attr(data-file-name);
+      color: var(--text-secondary);
+      position: absolute;
+      left: 120px;
+      top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🌌 Dark Chat Portal</h2>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+
+    <div id="input-area">
+      <input type="text" id="msg" placeholder="Type a message..." autocomplete="off" />
+      <button onclick="sendMsg()">Send</button>
+    </div>
+
+    <form id="file-form">
+      <input type="file" id="file" data-file-name="No file chosen" />
+      <button type="submit">📎 Send File</button>
+    </form>
+  </div>
+
+  <script>
+    const username = new URLSearchParams(window.location.search).get("username") || prompt("Enter your username:");
+    const chatBox = document.getElementById("chat-box");
+    const msgInput = document.getElementById("msg");
+    const fileInput = document.getElementById("file");
+    const fileForm = document.getElementById("file-form");
+
+    // Update file input display
+    fileInput.addEventListener('change', function() {
+      if(this.files.length > 0) {
+        this.setAttribute('data-file-name', this.files[0].name);
+      } else {
+        this.setAttribute('data-file-name', 'No file chosen');
+      }
+    });
+
+    let ws;
+
+    function appendMessage(msg, isSystem = false) {
+      const div = document.createElement("div");
+      div.className = "message" + (isSystem ? " system-message" : "");
+      div.innerHTML = msg;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    if (!username) {
+      appendMessage("Username is required to join the chat.", true);
+      msgInput.disabled = true;
+    } else {
+      ws = new WebSocket(`ws://${location.host}/ws/${username}`);
+
+      ws.onopen = () => {
+        appendMessage(`✅ Connected as <b>${username}</b>`, true);
+      };
+
+      ws.onmessage = (event) => {
+        appendMessage(event.data);
+      };
+
+      ws.onclose = () => {
+        appendMessage("❌ Disconnected from chat.", true);
+      };
+
+      ws.onerror = () => {
+        appendMessage("⚠️ WebSocket connection error.", true);
+      };
+    }
+
+    function sendMsg() {
+      const text = msgInput.value.trim();
+      if (text && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(text);
+        msgInput.value = "";
+      }
+    }
+
+    // Allow sending message with Enter key
+    msgInput.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        sendMsg();
+      }
+    });
+
+    fileForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/uploadfile/", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (res.ok) {
+          appendMessage(`📁 Uploaded: <i>${file.name}</i>`, true);
+          fileInput.value = "";
+          fileInput.setAttribute('data-file-name', 'No file chosen');
+        } else {
+          appendMessage("❌ File upload failed", true);
+        }
+      } catch (err) {
+        appendMessage("⚠️ File upload error", true);
+      }
+    });
+
+    window.sendMsg = sendMsg;
+  </script>
+</body>
+</html>

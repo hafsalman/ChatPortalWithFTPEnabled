@@ -1,4 +1,3 @@
-# ftp_server.py
 from pyftpdlib.servers import FTPServer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -12,5 +11,5 @@ def start_ftp():
     server = FTPServer(("0.0.0.0", 2121), handler)  # Listen on all IPs (0.0.0.0) and port 2121
     server.serve_forever()
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     start_ftp()
