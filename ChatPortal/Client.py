@@ -80,7 +80,7 @@ def StartChat(username):
 
             break
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python Client.py <username>")
     else:
