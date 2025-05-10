@@ -12,6 +12,6 @@ A robust web-based communication portal that combines real-time chat functionali
 ## Dependecies:
 pip install fastapi uvicorn pyftpdlib mysql-connector-python
 
-Commands to run:
+## Commands to run:
 1. python ChatPortal/Server.py
 2. python Main.py
