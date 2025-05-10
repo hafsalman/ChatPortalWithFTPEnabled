@@ -1,3 +1,14 @@
+CREATE USER 'chat_user'@'localhost' IDENTIFIED BY 'ChatUser@123';
+GRANT ALL PRIVILEGES ON CN_PROJECT.* TO 'chat_user'@'localhost';
+FLUSH PRIVILEGES;
+
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'chat_user'@'localhost';
+
+GRANT ALL PRIVILEGES ON CN_PROJECT.* TO 'chat_user'@'localhost';
+FLUSH PRIVILEGES;
+
+DROP USER IF EXISTS 'chat_user'@'localhost';
+
 CREATE DATABASE CN_PROJECT;
 
 USE CN_PROJECT;
@@ -8,20 +19,17 @@ CREATE TABLE USERS (
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL, -- bycrypt 
-    phone_number VARCHAR(20) UNIQUE, -- Maybe OTP
-    profile_picture VARCHAR(255),  -- URL or file path
-    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    account_verified BOOLEAN DEFAULT FALSE  -- Indicates if email/phone verification is done
+    phone_number VARCHAR(20) UNIQUE,
+    profile_picture VARCHAR(255),
+    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 SELECT * FROM USERS;
+DROP TABLE MESSAGES;
 
 CREATE TABLE MESSAGES (
     sender VARCHAR(50) NOT NULL,
-    receiver VARCHAR(50)  NOT NULL, -- Private Messages
+    receiver VARCHAR(50)  NOT NULL,
     message TEXT NOT NULL,
     m_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-SELECT * FROM MESSAGES;
-DROP TABLE MESSAGES;
