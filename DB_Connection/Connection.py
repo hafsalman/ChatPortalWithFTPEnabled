@@ -4,8 +4,8 @@ def createConnection():
     try: 
         conn = mysql.connector.connect(
             host="127.0.0.1",
-            user="chat_user",
-            password="ChatUser@123",
+            user="root",
+            password="abc123",
             database="CN_PROJECT"
         )
 
